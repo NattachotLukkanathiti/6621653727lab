@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+
+ mysql:
+  image: mysql:8
+  environment:
+   MYSQL_ROOT_PASSWORD: 1234
+   MYSQL_DATABASE: testSahagit
+   MYSQL_USER: test
+   MYSQL_PASSWORD: 1234
+  volumes:
+   - mysqldata:/var/lib/mysql
+  restart: always
+
+ backend:
+  build: ./backend
+  ports:
+   - "8001:8001"
+  volumes:
+   - ./backend:/app
+  restart: always
+  depends_on:
+   - mysql
+
+ phpmyadmin:
+  image: phpmyadmin
+  ports:
+   - "8081:80"
+  environment:
+   PMA_HOST: mysql
+  restart: always
+
+volumes:
+ mysqldata:
