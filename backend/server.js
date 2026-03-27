@@ -1,16 +1,17 @@
 const express = require("express");
 const path = require("path");
-const multer = require('multer');
 const mysql = require("mysql2");
 const cors = require("cors");
-const fs = require("fs");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "fontend")));
+app.use(express.static(path.join(__dirname, "frontend")));
 
+// ================== DB ==================
 const db = mysql.createConnection({
   host: "mysql",
   user: "test",
@@ -19,324 +20,156 @@ const db = mysql.createConnection({
 });
 
 db.connect(err => {
-  if (err) {
-    console.log(err)
-    return
+  if (err) return console.log(err);
+  console.log("MySQL Connected");
+});
+
+// ================== SECRET ==================
+const ACCESS_SECRET = "secret";
+const REFRESH_SECRET = "refresh_secret";
+
+// ================== JWT Middleware ==================
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    return res.status(401).json({
+      error: { code: "NO_TOKEN", message: "No token", details: {} }
+    });
   }
-  console.log("MySQL Connected")
-});
 
-const storage = multer.diskStorage({
-  destination: "./uploads",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
+  const token = authHeader.split(" ")[1];
 
-app.use("/uploads", express.static("uploads"));
-
-
-const upload = multer({ storage });
-
-
-// หน้าแรก
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "fontend", "main.html"));
-});
-
-app.get("/products", (req, res) => {
-  db.query("SELECT * FROM products", (err, result) => {
-    if (err) return res.json(err);
-    res.json(result);
-  });
-});
-
-app.get("/products/:id", (req, res) => {
-  db.query(
-    "SELECT * FROM products WHERE id=?",
-    [req.params.id],
-    (err, result) => {
-      if (err) return res.status(500).json(err);
-      res.json(result[0]);
-    }
-  );
-});
-
-app.get("/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, result) => {
-    if (err) return res.json(err);
-    res.json(result);
-  });
-});
-
-app.get("/cart", (req, res) => (
-  db.query("SELECT * FROM cart", (err, result) => {
-    if (err)
-      return res.json(err);
-    res.json(result);
-  })
-))
-
-app.post("/cart", (req, res) => {
-
- const id = req.body.id;
- const Username = req.body.Username;
-
- db.query(
-  "INSERT INTO cart (productname, price, category, qty, image,Username) SELECT productname, price, 1, qty, image,? FROM products WHERE id=?",
-    [Username,id],
-      (err, result) => {
-
-          if(err){
-              console.log(err);
-              res.status(500).json(err);
-          }else{
-              res.json({
-              message:"เพิ่มสินค้าแล้ว"
-          });
+  jwt.verify(token, ACCESS_SECRET, (err, user) => {
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({
+          error: {
+            code: "TOKEN_EXPIRED",
+            message: "Token expired, please refresh",
+            details: {}
           }
-        }
-      );
-});
-
-
-app.get("/productsmain", (req, res) => {
-  db.query("SELECT * FROM products", (err, result) => {
-    if (err) return res.json(err);
-    res.gson(result);
-  })
-})
-app.post("/products", upload.single("image"), (req, res) => {
-
-  const { productname, price, category, qty } = req.body;
-
-  const image = req.file ? req.file.filename : null;
-
-
-  db.query(
-    "INSERT INTO products(productname,price,category,qty,image) VALUES(?,?,?,?,?)",
-    [productname, price, category, qty, image],
-    (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json(err);
+        });
       }
-
-      res.json({ message: "added" });
+      return res.status(401).json({
+        error: { code: "INVALID_TOKEN", message: "Invalid token", details: {} }
+      });
     }
-  );
 
-});
+    req.user = user;
+    next();
+  });
+}
 
-app.post("/users", (req, res) => {
-  const { Username, Password } = req.body;
+function authorizeRole(roles = []) {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        error: { code: "FORBIDDEN", message: "No permission", details: {} }
+      });
+    }
+    next();
+  };
+}
 
-  if (!Username || !Password) {
-    return res.status(400).json({
-      message: "Username or Password incorrect "
-    })
-  }
-  else {
+// ================== REGISTER ==================
+app.post("/users", async (req, res) => {
+  const { Username, Password, role } = req.body;
+
+  try {
+    const hashed = await bcrypt.hash(Password, 10);
+    const id = uuidv4(); // ✅ สร้าง id
+
     db.query(
-      "INSERT INTO users(Username,Password) VALUES(?,?)",
-      [Username, Password],
-      (error) => {
-        if (error) {
-          console.log(error);
-          return res.status(500).json(error);
+      "INSERT INTO users(id,username,password_hash,role) VALUES(?,?,?,?)",
+      [id, Username, hashed, role || "DISPATCHER"],
+      (err) => {
+        if (err) {
+          console.log(err); // 🔥 สำคัญ
+          return res.status(500).json(err);
         }
-        res.json({ message: "Add Usename and Password sussesfully" })
+        res.json({ message: "Register success" });
       }
     );
+  } catch (err) {
+    
+    res.status(500).json(err);
   }
 });
+// ================== LOGIN ==================
+app.post("/auth/login", (req, res) => {
+  const { username, password } = req.body;
 
-app.post("/login", (req, res) => {
-
-  const { Username, Password } = req.body;
-  if (!Username && !Password) {
-    return res.json({ status: "fail" }),
-      console.log("fail username")
-  }if(!Username){
-    return res.json({status:"NoUsername"}),
-    console.log("กรอกผู้ใช้งานก่อน")
-  }if(!Password){
-    return res.json({status:"NoPassword"}),
-    console.log("กรอกรหัสผ่าน")
-  }
   db.query(
-    "SELECT * FROM users WHERE Username=? AND Password=?",
-    [Username, Password],
-    (err, result) => {
+    "SELECT * FROM users WHERE username=?",
+    [username],
+    async (err, result) => {
 
-      if (result.length > 0) {
-        res.json({ status: "success", Username: result[0],Username });
-      } else {
-        res.json({ status: "fail" });
+      if (result.length === 0) {
+        return res.status(401).json({ error: "INVALID_CREDENTIALS" });
       }
 
-    })
+      const user = result[0];
 
-})
+      const match = await bcrypt.compare(password, user.password_hash);
 
-app.put("/products/:id", upload.single("image"), (req, res) => {
+      if (!match) {
+        return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+      }
 
-  const { productname, price, category, qty } = req.body;
-  const id = req.params.id;
-  const image = req.file ? req.file.filename : null;
-  console.log("BODY:", req.body);
-  console.log("ID:", id);
+      // token...
+    }
+  );
+});
+// ================== REFRESH ==================
+app.post("/auth/refresh", (req, res) => {
+  const { refresh_token } = req.body;
 
-  let sql;
-  let values;
-
-  if (image) {
-    sql = `UPDATE products SET productname=?, price=?, category=?, qty=?, image=? WHERE id=?`;
-    values = [productname, price, category, qty, image, id];
-  } else {
-    sql = `UPDATE products SET productname=?, price=?, category=?, qty=? WHERE id=?`;
-    values = [productname, price, category, qty, id];
+  if (!refresh_token) {
+    return res.status(401).json({
+      error: {
+        code: "NO_REFRESH",
+        message: "No refresh token",
+        details: {}
+      }
+    });
   }
 
-  db.query(sql, values, (err) => {
+  jwt.verify(refresh_token, REFRESH_SECRET, (err, user) => {
     if (err) {
-      console.log(err);
-      return res.status(500).json(err);
+      return res.status(401).json({
+        error: {
+          code: "INVALID_REFRESH",
+          message: "Refresh token expired, please login again",
+          details: {}
+        }
+      });
     }
-    res.json({ message: "updated" });
+
+    const newAccess = jwt.sign(
+      { id: user.id, role: user.role },
+      ACCESS_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.json({ access_token: newAccess });
   });
-
 });
 
+// ================== PROTECTED ROUTES ==================
+app.use(authenticateToken);
 
-app.delete("/users/:id", (req, res) => {
+// DISPATCHER + ADMIN
 
+
+// ADMIN ONLY
+app.delete("/products/:id", authorizeRole(["ADMIN"]), (req, res) => {
   const id = req.params.id;
 
-  db.query(
-    "DELETE FROM users WHERE id = ?",
-    [id],
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          error: err
-        });
-      }
-      res.json({
-        message: "User deleted successfully",
-        result: result
-      });
-    }
-  );
+  db.query("DELETE FROM products WHERE id=?", [id], err => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Deleted" });
+  });
 });
 
-app.delete("/products/:id", (req, res) => {
-  const id = req.params.id;
-  db.query(
-    "SELECT image FROM products WHERE id=?",
-    [id],
-    (err, result) => {
-      if (err) return res.status(500).json(err);
-      const image = result[0]?.image;
-      if (image) {
-        fs.unlink(`./uploads/${image}`, err => {
-          if (err) console.log("delete image error:", err);
-        });
-      }
-      db.query(
-        "DELETE FROM products WHERE id=?",
-        [id],
-        err => {
-          if (err) return res.status(500).json(err);
-          res.json({ message: "deleted" });
-        }
-      );
-
-    }
-  );
-
-});
-
-app.delete("/cart/:id",(req,res)=>{
-  const id = req.params.id;
-  db.query("DELETE FROM cart WHERE id=?",
-    [id],
-    (err,result) =>{
-      if(err)
-        return res.status(500).json(err)
-        res.json({message: "deleted"});
-    }
-  )
-})
-
-
-
-app.put("/cart/:id",(req,res)=>{
- const id = req.params.id;
- const category = req.body.category;
- db.query(
-  "UPDATE cart SET category=? WHERE id=?",
-  [category,id],
-  (err,result)=>{
-   if(err){
-    return res.status(500).json(err);
-   }
-   res.json({message:"updated"});
-  }
- )
-})
-
-app.post("/Sale", (req, res) => {
-  db.query(
-    "INSERT INTO Sale (productname, Username) SELECT productname, Username FROM cart",
-    (err, result) => {
-      if (err) {
-        return res.json({ message: "ชำระเงินไม่สำเร็จ" });
-      }
-      db.query(`UPDATE products p JOIN cart c ON p.productname = c.productname SET p.category = p.category - c.category`, 
-        (err2, result2) => {
-        if (err2) {
-          return res.json({ message: "ตัดสต็อกไม่สำเร็จ" });
-        }
-        db.query("DELETE FROM cart", (err3) => {
-          if (err3) {
-            return res.json({ message: "ลบ cart ไม่สำเร็จ" });
-          }
-          res.json({ message: "ชำระเงินสำเร็จแล้ว" });
-        });
-      });
-    }
-  );
-});
-
-app.get("/Sale",(req,res)=>{
-  db.query("SELECT * FROM Sale",
-    (err,result)=>{
-      if(err){
-        res.json({message:"ล้มเหลว"})
-      }
-      res.status(200).json(result);
-    }
-  )
-})
-
-app.put("/users/:id",(req,res)=>{
- const id = req.params.id;
- const point = req.body.point;
- db.query(
-  "UPDATE users SET point=? WHERE id=?",
-  [point,id],
-  (err,result)=>{
-   if(err){
-    return res.status(500).json(err);
-   }
-   res.json({message:"updated"});
-  }
- )
-})
-
-
-
-app.listen(8001, () => {
-  console.log("Server running on 8001")
-});
+// ================== START ==================
+app.listen(8001, () => console.log("Server running on 8001"));

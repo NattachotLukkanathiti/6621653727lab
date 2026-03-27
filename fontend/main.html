@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>หน้าเว็บพื้นฐาน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css.css">
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar">
+    <div class="navbar__logo">My<span>Site</span></div>
+    <ul class="navbar__links">
+      <li><a href="#home">หน้าแรก</a></li>
+      <li><a href="#features">บริการ</a></li>
+      <li><a href="#about">เกี่ยวกับ</a></li>
+      <li><a href="#gallery">ผลงาน</a></li>
+      <li><a href="#contact">ติดต่อ</a></li>
+    </ul>
+  </nav>
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero" id="home">
+    <span class="hero__tag">ยินดีต้อนรับสู่ MySite</span>
+    <h1 class="hero__title">สร้างสิ่งที่<em>ยอดเยี่ยม</em><br>ด้วยโค้ดพื้นฐาน</h1>
+    <p class="hero__desc">หน้าเว็บนี้แสดงโครงสร้าง HTML และ CSS พื้นฐานครบทุกส่วน พร้อมดีไซน์สะอาดและใช้งานได้จริง</p>
+    <div class="hero__actions">
+      <button class="btn btn--primary">เริ่มต้นใช้งาน →</button>
+      <button class="btn btn--outline">ดูผลงาน</button>
+    </div>
+  </section>
+
+  <!-- ==================== FEATURES ==================== -->
+  <section class="section" id="features">
+    <div class="section__header">
+      <span class="section__tag">บริการ</span>
+      <h2 class="section__title">สิ่งที่เราทำได้</h2>
+      <p class="section__sub">ครบครันทุกด้านของการพัฒนาเว็บไซต์</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="card__icon">🎨</div>
+        <h3 class="card__title">ออกแบบ UI/UX</h3>
+        <p class="card__text">สร้างหน้าตาเว็บไซต์ให้สวยงาม ใช้งานง่าย และตอบโจทย์ผู้ใช้งานจริง</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">⚡</div>
+        <h3 class="card__title">พัฒนาเว็บไซต์</h3>
+        <p class="card__text">เขียนโค้ดที่สะอาด มีประสิทธิภาพ และรองรับทุกขนาดหน้าจอ</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">🚀</div>
+        <h3 class="card__title">ติดตั้งและ Deploy</h3>
+        <p class="card__text">นำเว็บไซต์ขึ้น Server พร้อมดูแลและปรับปรุงอย่างต่อเนื่อง</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">🔒</div>
+        <h3 class="card__title">ความปลอดภัย</h3>
+        <p class="card__text">ดูแลความปลอดภัยของระบบและข้อมูลผู้ใช้ด้วยมาตรฐานสากล</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">📊</div>
+        <h3 class="card__title">วิเคราะห์ข้อมูล</h3>
+        <p class="card__text">ติดตาม Analytics และวัดผลเพื่อพัฒนาเว็บไซต์ให้ดียิ่งขึ้น</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">🛠️</div>
+        <h3 class="card__title">บำรุงรักษา</h3>
+        <p class="card__text">ดูแลระบบอย่างต่อเนื่อง อัปเดตและแก้ไขปัญหาได้รวดเร็ว</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ABOUT ==================== -->
+  <section class="section" id="about">
+    <div class="section__header">
+      <span class="section__tag">เกี่ยวกับเรา</span>
+      <h2 class="section__title">ใครคือ MySite?</h2>
+      <p class="section__sub">ทีมพัฒนาเว็บไซต์มืออาชีพที่มีประสบการณ์มากกว่า 10 ปี</p>
+    </div>
+    <div class="about">
+      <div class="about__img-wrap">
+        <div class="about__img-placeholder">🏢</div>
+        <div class="about__badge">
+          <strong>10+</strong>
+          ปีประสบการณ์
+        </div>
+      </div>
+      <div class="about__content">
+        <p>เราคือทีมนักพัฒนาและดีไซเนอร์ที่มีความหลงใหลในการสร้างเว็บไซต์ที่สวยงามและใช้งานได้จริง เราเชื่อว่าทุกธุรกิจสมควรมีตัวตนบนโลกออนไลน์ที่แข็งแกร่ง</p>
+        <p>ตั้งแต่เว็บไซต์ขนาดเล็กไปจนถึงแอปพลิเคชันขนาดใหญ่ เราพร้อมดูแลทุกขั้นตอนของโปรเจคด้วยความใส่ใจและความเป็นมืออาชีพ</p>
+        <div class="about__stats">
+          <div>
+            <span class="stat__num">200+</span>
+            <span class="stat__label">โปรเจคสำเร็จ</span>
+          </div>
+          <div>
+            <span class="stat__num">150+</span>
+            <span class="stat__label">ลูกค้าพึงพอใจ</span>
+          </div>
+          <div>
+            <span class="stat__num">10+</span>
+            <span class="stat__label">ปีประสบการณ์</span>
+          </div>
+        </div>
+        <button class="btn btn--primary" style="align-self: flex-start; margin-top: 0.5rem;">รู้จักทีมเรา →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== GALLERY ==================== -->
+  <section class="section" id="gallery">
+    <div class="section__header">
+      <span class="section__tag">ผลงาน</span>
+      <h2 class="section__title">ตัวอย่างงานของเรา</h2>
+      <p class="section__sub">เลือกดูโปรเจคที่ผ่านมา</p>
+    </div>
+    <div class="gallery">
+      <div class="gallery__item gallery__item--wide">🌐</div>
+      <div class="gallery__item">🛍️</div>
+      <div class="gallery__item">📱</div>
+      <div class="gallery__item">📊</div>
+      <div class="gallery__item gallery__item--wide">🎨</div>
+    </div>
+  </section>
+
+  <!-- ==================== CONTACT ==================== -->
+  <section class="section" id="contact">
+    <div class="section__header">
+      <span class="section__tag">ติดต่อ</span>
+      <h2 class="section__title">พูดคุยกับเรา</h2>
+      <p class="section__sub">เราพร้อมตอบทุกคำถามภายใน 24 ชั่วโมง</p>
+    </div>
+    <div class="contact">
+      <div class="contact__info">
+        <div class="contact__item">
+          <div class="contact__icon">📍</div>
+          <div>
+            <div class="contact__label">ที่อยู่</div>
+            <div class="contact__val">123 ถนนสุขุมวิท กรุงเทพฯ 10110</div>
+          </div>
+        </div>
+        <div class="contact__item">
+          <div class="contact__icon">📞</div>
+          <div>
+            <div class="contact__label">โทรศัพท์</div>
+            <div class="contact__val">02-xxx-xxxx</div>
+          </div>
+        </div>
+        <div class="contact__item">
+          <div class="contact__icon">✉️</div>
+          <div>
+            <div class="contact__label">อีเมล</div>
+            <div class="contact__val">hello@mysite.co.th</div>
+          </div>
+        </div>
+        <div class="contact__item">
+          <div class="contact__icon">🕐</div>
+          <div>
+            <div class="contact__label">เวลาทำการ</div>
+            <div class="contact__val">จันทร์–ศุกร์ 09:00–18:00 น.</div>
+          </div>
+        </div>
+      </div>
+      <div class="contact__form">
+        <div class="form__row">
+          <div class="form__group">
+            <label for="name">ชื่อ-นามสกุล</label>
+            <input type="text" id="name" placeholder="กรอกชื่อของคุณ" />
+          </div>
+          <div class="form__group">
+            <label for="email">อีเมล</label>
+            <input type="email" id="email" placeholder="example@email.com" />
+          </div>
+        </div>
+        <div class="form__group">
+          <label for="subject">หัวข้อ</label>
+          <input type="text" id="subject" placeholder="หัวข้อที่ต้องการติดต่อ" />
+        </div>
+        <div class="form__group">
+          <label for="message">ข้อความ</label>
+          <textarea id="message" rows="5" placeholder="เขียนข้อความของคุณที่นี่..."></textarea>
+        </div>
+        <button class="btn btn--primary">ส่งข้อความ →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div>
+        <div class="footer__logo">My<span>Site</span></div>
+        <p class="footer__tagline">สร้างเว็บไซต์ที่ยอดเยี่ยมด้วยกัน</p>
+      </div>
+      <div>
+        <p style="color:#fff; font-weight:600; margin-bottom:0.8rem; font-size:0.9rem;">เมนูหลัก</p>
+        <ul class="footer__links">
+          <li><a href="#home">หน้าแรก</a></li>
+          <li><a href="#features">บริการ</a></li>
+          <li><a href="#about">เกี่ยวกับ</a></li>
+          <li><a href="#gallery">ผลงาน</a></li>
+        </ul>
+      </div>
+      <div>
+        <p style="color:#fff; font-weight:600; margin-bottom:0.8rem; font-size:0.9rem;">ติดต่อ</p>
+        <ul class="footer__links">
+          <li><a href="#contact">ส่งข้อความ</a></li>
+          <li><a href="#">Facebook</a></li>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">LINE Official</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>© 2026 <strong>MySite</strong> — สงวนลิขสิทธิ์ทุกประการ</p>
+    </div>
+  </footer>
+
+</body>
+</html>
